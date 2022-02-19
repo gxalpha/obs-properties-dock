@@ -1,0 +1,5 @@
+build
+release
+.DS_Store
+*.generated.*
+CI/include/build_environment.sh
