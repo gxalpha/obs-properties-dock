@@ -21,7 +21,7 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 #include <obs-frontend-api.h>
 #include <QMainWindow>
 
-#define QTStr(lookupVal) QObject::tr(lookupVal)
+#define QTStr(lookupVal) QString(obs_frontend_get_locale_string(lookupVal))
 
 /* Modern problems require modern solutions */
 class YupThisReallyIsAThing {
