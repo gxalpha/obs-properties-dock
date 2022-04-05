@@ -4,7 +4,7 @@ project(obs-properties-dock VERSION 0.1.0)
 add_library(${CMAKE_PROJECT_NAME} MODULE)
 set(PLUGIN_AUTHOR "Sebastian Beckmann")
 set(MACOS_BUNDLEID "net.sebastianbeckmann.obs-plugins.properties-dock")
-#set(LINUX_MAINTAINER_EMAIL "redacted@example.com")
+set(LINUX_MAINTAINER_EMAIL "redacted@example.com")
 
 
 target_sources(${CMAKE_PROJECT_NAME}
