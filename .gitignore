@@ -1,5 +1,13 @@
-build
-release
+*~
 .DS_Store
+/build/
+/build_*/
+/release/
+/installer/Output/
+
+.vscode
+.idea
+
+# ignore generated files
 *.generated.*
-CI/include/build_environment.sh
+**/.Brewfile.lock.json
