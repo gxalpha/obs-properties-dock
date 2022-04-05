@@ -51,6 +51,5 @@
             }
         }
     },
-    "name": "obs-plugintemplate",
-    "version": "1.0.0"
+    "name": "obs-properties-dock"
 }

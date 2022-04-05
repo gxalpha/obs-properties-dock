@@ -121,21 +121,23 @@ Usage: %B${functrace[1]%:*}%b <option> [<options>]
   check_${host_os}
   setup_${host_os}
 
-  read -r product_name product_version <<< \
-    "$(jq -r '. | {name, version} | join(" ")' ${project_root}/buildspec.json)"
+#  read -r product_name product_version <<< \
+#    "$(jq -r '. | {name, version} | join(" ")' ${project_root}/buildspec.json)"
+  read -r product_name <<< \
+    "$(jq -r '. | {name} | join(" ")' ${project_root}/buildspec.json)"
 
-  case ${host_os} {
-    macos-*)
-      sed -i '' \
-        "s/project(\(.*\) VERSION \(.*\))/project(${product_name} VERSION ${product_version})/" \
-        "${project_root}"/CMakeLists.txt
-      ;;
-    linux-*)
-      sed -i'' \
-        "s/project(\(.*\) VERSION \(.*\))/project(${product_name} VERSION ${product_version})/"\
-        "${project_root}"/CMakeLists.txt
-      ;;
-  }
+#  case ${host_os} {
+#    macos-*)
+#      sed -i '' \
+#        "s/project(\(.*\) VERSION \(.*\))/project(${product_name} VERSION ${product_version})/" \
+#        "${project_root}"/CMakeLists.txt
+#      ;;
+#    linux-*)
+#      sed -i'' \
+#        "s/project(\(.*\) VERSION \(.*\))/project(${product_name} VERSION ${product_version})/"\
+#        "${project_root}"/CMakeLists.txt
+#      ;;
+#  }
 
   setup_obs
 
