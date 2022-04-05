@@ -239,7 +239,7 @@ jobs:
     strategy:
       matrix:
         arch: ['x86', 'x64']
-    if: always()
+    if: always() && false
     needs: [clang_check]
     outputs:
       commitHash: ${{ steps.setup.outputs.commitHash }}
