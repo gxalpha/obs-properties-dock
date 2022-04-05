@@ -54,6 +54,10 @@ target_link_libraries(
   ${CMAKE_PROJECT_NAME} PRIVATE OBS::libobs OBS::obs-frontend-api Qt5::Core
                                 Qt5::Widgets)
 
+if(OS_POSIX)
+  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Qt5::GuiPrivate)
+endif()
+
 set_target_properties(
   ${CMAKE_PROJECT_NAME}
   PROPERTIES AUTOMOC ON
