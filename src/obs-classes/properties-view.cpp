@@ -26,7 +26,6 @@
 #include "double-slider.hpp"
 #include "slider-ignorewheel.hpp"
 #include "spinbox-ignorewheel.hpp"
-#include "combobox-ignorewheel.hpp"
 #include "qt-wrappers.hpp"
 #include "properties-view.hpp"
 #include "properties-view.moc.hpp"
@@ -180,14 +179,15 @@ void OBSPropertiesView::GetScrollPos(int &h, int &v)
 OBSPropertiesView::OBSPropertiesView(OBSData settings_, obs_object_t *obj,
 				     PropertiesReloadCallback reloadCallback,
 				     PropertiesUpdateCallback callback_,
-				     PropertiesVisualUpdateCb cb_, int minSize_)
+				     PropertiesVisualUpdateCb visUpdateCb_,
+				     int minSize_)
 	: VScrollArea(nullptr),
 	  properties(nullptr, obs_properties_destroy),
 	  settings(settings_),
 	  weakObj(obs_object_get_weak_object(obj)),
 	  reloadCallback(reloadCallback),
 	  callback(callback_),
-	  cb(cb_),
+	  visUpdateCb(visUpdateCb_),
 	  minSize(minSize_)
 {
 	setFrameShape(QFrame::NoFrame);
@@ -198,14 +198,15 @@ OBSPropertiesView::OBSPropertiesView(OBSData settings_, obs_object_t *obj,
 OBSPropertiesView::OBSPropertiesView(OBSData settings_, void *obj,
 				     PropertiesReloadCallback reloadCallback,
 				     PropertiesUpdateCallback callback_,
-				     PropertiesVisualUpdateCb cb_, int minSize_)
+				     PropertiesVisualUpdateCb visUpdateCb_,
+				     int minSize_)
 	: VScrollArea(nullptr),
 	  properties(nullptr, obs_properties_destroy),
 	  settings(settings_),
 	  rawObj(obj),
 	  reloadCallback(reloadCallback),
 	  callback(callback_),
-	  cb(cb_),
+	  visUpdateCb(visUpdateCb_),
 	  minSize(minSize_)
 {
 	setFrameShape(QFrame::NoFrame);
@@ -530,7 +531,7 @@ static string from_obs_data_autoselect(obs_data_t *data, const char *name,
 QWidget *OBSPropertiesView::AddList(obs_property_t *prop, bool &warning)
 {
 	const char *name = obs_property_name(prop);
-	QComboBox *combo = new ComboBoxIgnoreScroll();
+	QComboBox *combo = new QComboBox();
 	obs_combo_type type = obs_property_list_type(prop);
 	obs_combo_format format = obs_property_list_format(prop);
 	size_t count = obs_property_list_item_count(prop);
@@ -970,7 +971,7 @@ CreateSimpleFPSValues(OBSFrameRatePropertyWidget *fpsProps, bool &selected,
 	auto items = vector<common_frame_rate>{};
 	items.reserve(sizeof(common_fps) / sizeof(common_frame_rate));
 
-	auto combo = fpsProps->simpleFPS = new ComboBoxIgnoreScroll{};
+	auto combo = fpsProps->simpleFPS = new QComboBox();
 
 	combo->addItem("", QVariant::fromValue(make_fps(0, 0)));
 	for (const auto &fps : common_fps) {
@@ -1052,7 +1053,7 @@ static QWidget *CreateRationalFPS(OBSFrameRatePropertyWidget *fpsProps,
 	auto str = QTStr("Basic.PropertiesView.FPS.ValidFPSRanges");
 	auto rlabel = new QLabel{str};
 
-	auto combo = fpsProps->fpsRange = new ComboBoxIgnoreScroll{};
+	auto combo = fpsProps->fpsRange = new QComboBox();
 	auto convert_fps = media_frames_per_second_to_fps;
 	//auto convert_fi  = media_frames_per_second_to_frame_interval;
 
@@ -1103,7 +1104,7 @@ CreateFrameRateWidget(obs_property_t *prop, bool &warning, const char *option,
 
 	swap(widget->fps_ranges, fps_ranges);
 
-	auto combo = widget->modeSelect = new ComboBoxIgnoreScroll{};
+	auto combo = widget->modeSelect = new QComboBox();
 	combo->addItem(QTStr("Basic.PropertiesView.FPS.Simple"),
 		       QVariant::fromValue(frame_rate_tag::simple()));
 	combo->addItem(QTStr("Basic.PropertiesView.FPS.Rational"),
@@ -2028,11 +2029,11 @@ void WidgetInfo::ControlChanged()
 		blog(LOG_DEBUG, "No update timer or no callback!");
 	}
 
-	if (view->cb && !view->deferUpdate) {
+	if (view->visUpdateCb && !view->deferUpdate) {
 		OBSObject strongObj = view->GetObject();
 		void *obj = strongObj ? strongObj.Get() : view->rawObj;
 		if (obj)
-			view->cb(obj, view->settings);
+			view->visUpdateCb(obj, view->settings);
 	}
 
 	view->SignalChanged();

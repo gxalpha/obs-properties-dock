@@ -16,8 +16,6 @@ target_sources(
           src/transform-view.cpp
           src/transform-view.hpp
           src/obs-classes-helper-functions.hpp
-          src/obs-classes/combobox-ignorewheel.cpp
-          src/obs-classes/combobox-ignorewheel.hpp
           src/obs-classes/double-slider.cpp
           src/obs-classes/double-slider.hpp
           src/obs-classes/mute-checkbox.hpp
