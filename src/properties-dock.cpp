@@ -37,6 +37,9 @@ void PropertiesDock::SetSource(OBSSource source)
 			obs_source_update(source, settings);
 		};
 
+		if (propertiesView)
+			delete propertiesView;
+
 		OBSDataAutoRelease settings = obs_source_get_settings(source);
 		propertiesView = new OBSPropertiesView(
 			settings.Get(), source,
@@ -46,8 +49,10 @@ void PropertiesDock::SetSource(OBSSource source)
 
 		setWidget(propertiesView);
 	} else {
-		if (propertiesView)
+		if (propertiesView) {
+			delete propertiesView;
 			propertiesView = nullptr;
+		}
 
 		setWidget(new QLabel(
 			QTStr("Basic.TransformWindow.NoSelectedSource")));
