@@ -24,12 +24,15 @@ void TransformDock::SetSceneItem(OBSSceneItem item)
 		if (transformView) {
 			transformView->SetNewItem(item);
 		} else {
+			delete transformView;
 			transformView = new OBSBasicTransform(item);
 			setWidget(transformView);
 		}
 	} else {
-		if (transformView)
+		if (transformView) {
+			delete transformView;
 			transformView = nullptr;
+		}
 
 		setWidget(new QLabel(
 			QTStr("Basic.TransformWindow.NoSelectedSource")));
