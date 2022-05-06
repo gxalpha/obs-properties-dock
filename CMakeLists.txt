@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 3.16...3.21)
 
 project(obs-properties-dock VERSION 0.1.0)
 add_library(${CMAKE_PROJECT_NAME} MODULE)
@@ -37,6 +37,7 @@ target_sources(
 find_package(libobs REQUIRED)
 find_package(obs-frontend-api REQUIRED)
 include(cmake/ObsPluginHelpers.cmake)
+find_qt(VERSION ${QT_VERSION} COMPONENTS Widgets Core)
 
 configure_file(src/plugin-macros.h.in
                ${CMAKE_SOURCE_DIR}/src/plugin-macros.generated.h)
@@ -49,8 +50,8 @@ target_include_directories(${CMAKE_PROJECT_NAME}
                            PRIVATE ${CMAKE_SOURCE_DIR}/src)
 
 target_link_libraries(
-  ${CMAKE_PROJECT_NAME} PRIVATE OBS::libobs OBS::obs-frontend-api Qt5::Core
-                                Qt5::Widgets)
+  ${CMAKE_PROJECT_NAME} PRIVATE OBS::libobs OBS::obs-frontend-api Qt::Core
+                                Qt::Widgets)
 
 if(OS_POSIX)
   target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Qt5::GuiPrivate)
