@@ -37,7 +37,7 @@ target_sources(
 find_package(libobs REQUIRED)
 find_package(obs-frontend-api REQUIRED)
 include(cmake/ObsPluginHelpers.cmake)
-find_qt(VERSION ${QT_VERSION} COMPONENTS Widgets Core)
+find_qt(COMPONENTS Widgets Core)
 
 configure_file(src/plugin-macros.h.in
                ${CMAKE_SOURCE_DIR}/src/plugin-macros.generated.h)
@@ -54,7 +54,7 @@ target_link_libraries(
                                 Qt::Widgets)
 
 if(OS_POSIX)
-  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Qt5::GuiPrivate)
+  target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE Qt::GuiPrivate)
 endif()
 
 set_target_properties(
@@ -80,8 +80,8 @@ if(OS_WINDOWS)
 
   # -- macOS specific build settings and tasks --
 elseif(OS_MACOS)
-  configure_file(cmake/bundle/macos/installer-macOS.pkgproj.in
-                 ${CMAKE_BINARY_DIR}/installer-macOS.generated.pkgproj)
+  configure_file(cmake/bundle/macos/installer-macos.pkgproj.in
+                 ${CMAKE_BINARY_DIR}/installer-macos.generated.pkgproj)
 
   set(MACOSX_PLUGIN_GUI_IDENTIFIER "${MACOS_BUNDLEID}")
   set(MACOSX_PLUGIN_BUNDLE_VERSION "${CMAKE_PROJECT_VERSION}")
