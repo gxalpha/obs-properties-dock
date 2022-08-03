@@ -31,6 +31,8 @@ public:
 		return static_cast<QMainWindow *>(
 			obs_frontend_get_main_window());
 	}
+	/* TODO: Support light mode */
+	inline bool IsThemeDark() { return true; }
 };
 YupThisReallyIsAThing *const dontUseThisPlzKThx = new YupThisReallyIsAThing();
 
