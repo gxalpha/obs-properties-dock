@@ -37,4 +37,5 @@ public:
 
 private:
 	OBSPropertiesView *propertiesView = nullptr;
+	QLabel *nothingSelectedLabel = nullptr;
 };

@@ -37,4 +37,5 @@ public:
 
 private:
 	OBSBasicTransform *transformView = nullptr;
+	QLabel *nothingSelectedLabel = nullptr;
 };

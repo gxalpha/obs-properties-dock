@@ -54,8 +54,10 @@ void PropertiesDock::SetSource(OBSSource source)
 			propertiesView = nullptr;
 		}
 
-		setWidget(new QLabel(
-			QTStr("Basic.TransformWindow.NoSelectedSource")));
+		if (!nothingSelectedLabel)
+			nothingSelectedLabel = new QLabel(QTStr(
+				"Basic.TransformWindow.NoSelectedSource"));
+		setWidget(nothingSelectedLabel);
 	}
 }
 

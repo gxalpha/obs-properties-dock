@@ -34,8 +34,10 @@ void TransformDock::SetSceneItem(OBSSceneItem item)
 			transformView = nullptr;
 		}
 
-		setWidget(new QLabel(
-			QTStr("Basic.TransformWindow.NoSelectedSource")));
+		if (!nothingSelectedLabel)
+			nothingSelectedLabel = new QLabel(QTStr(
+				"Basic.TransformWindow.NoSelectedSource"));
+		setWidget(nothingSelectedLabel);
 	}
 }
 
