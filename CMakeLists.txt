@@ -34,6 +34,7 @@ target_sources(
           src/obs-classes/vertical-scroll-area.hpp
           src/obs-classes/obs-app.hpp)
 
+# Import libobs as main plugin dependency
 find_package(libobs REQUIRED)
 include(cmake/ObsPluginHelpers.cmake)
 
@@ -69,6 +70,9 @@ target_link_libraries(${CMAKE_PROJECT_NAME} PRIVATE OBS::libobs)
 if(OS_WINDOWS)
   configure_file(cmake/bundle/windows/installer-Windows.iss.in
                  ${CMAKE_BINARY_DIR}/installer-Windows.generated.iss)
+
+  configure_file(cmake/bundle/windows/resource.rc.in ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.rc)
+  target_sources(${CMAKE_PROJECT_NAME} PRIVATE ${CMAKE_BINARY_DIR}/${CMAKE_PROJECT_NAME}.rc)
 
   if(MSVC)
     target_compile_options(${CMAKE_PROJECT_NAME} PRIVATE /W4)

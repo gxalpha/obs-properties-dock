@@ -174,6 +174,7 @@ if(OS_POSIX)
   target_compile_options(
     ${CMAKE_PROJECT_NAME}
     PRIVATE
+      -Werror
       -Wextra
       -Wvla
       -Wformat
@@ -457,15 +458,15 @@ if(OS_MACOS)
 
   # Helper function to add resources from "data" directory as bundle resources
   function(install_bundle_resources target)
-    if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/data)
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/data")
       file(GLOB_RECURSE _DATA_FILES "${CMAKE_CURRENT_SOURCE_DIR}/data/*")
       foreach(_DATA_FILE IN LISTS _DATA_FILES)
         file(RELATIVE_PATH _RELATIVE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/data/ ${_DATA_FILE})
-        get_filename_component(_RELATIVE_PATH ${_RELATIVE_PATH} PATH)
+        get_filename_component(_RELATIVE_PATH "${_RELATIVE_PATH}" PATH)
         target_sources(${target} PRIVATE ${_DATA_FILE})
         set_source_files_properties(${_DATA_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION
-                                                             Resources/${_RELATIVE_PATH})
-        string(REPLACE "\\" "\\\\" _GROUP_NAME ${_RELATIVE_PATH})
+                                                             "Resources/${_RELATIVE_PATH}")
+        string(REPLACE "\\" "\\\\" _GROUP_NAME "${_RELATIVE_PATH}")
         source_group("Resources\\${_GROUP_NAME}" FILES ${_DATA_FILE})
       endforeach()
     endif()
@@ -549,6 +550,7 @@ else()
         ${CMAKE_PROJECT_NAME}
         PRIVATE /MP
                 /W3
+                /WX
                 /wd4201
                 "$<$<CONFIG:RELWITHDEBINFO>:/Ob2>"
                 "$<$<CONFIG:DEBUG>:/DDEBUG=1;/D_DEBUG=1>"
@@ -573,6 +575,7 @@ else()
         ${CMAKE_PROJECT_NAME}
         PRIVATE
         "LINKER:/OPT:REF"
+        "LINKER:/WX"
         "$<$<NOT:$<EQUAL:${CMAKE_SIZEOF_VOID_P},8>>:LINKER\:/SAFESEH\:NO>"
         "$<$<CONFIG:DEBUG>:LINKER\:/INCREMENTAL\:NO>"
         "$<$<CONFIG:RELWITHDEBINFO>:LINKER\:/INCREMENTAL\:NO;/OPT\:ICF>")
