@@ -17,74 +17,71 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
 #include "properties-dock.hpp"
+#include <obs-frontend-api.h>
 
 void PropertiesDock::SetSource(OBSSource source)
 {
-	if (source) {
-		/* Check if the properties changed, otherwise return early */
-		if (mainWidget &&
-		    mainWidget->findChild<OBSPropertiesView *>()->IsObject(
-			    source))
-			return;
+    if (source) {
+        /* Check if the properties changed, otherwise return early */
+        if (mainWidget && mainWidget->findChild<OBSPropertiesView *>()->IsObject(source))
+            return;
 
-		auto updateCb = [](void *obj, obs_data_t *old_settings,
-				   obs_data_t *new_settings) {
-			UNUSED_PARAMETER(old_settings); // TODO: Undo/Redo
-			OBSSource source = static_cast<obs_source_t *>(obj);
-			obs_source_update(source, new_settings);
-		};
+        auto updateCb = [](void *obj, obs_data_t *old_settings, obs_data_t *new_settings) {
+            UNUSED_PARAMETER(old_settings); // TODO: Undo/Redo
+            OBSSource source = static_cast<obs_source_t *>(obj);
+            obs_source_update(source, new_settings);
+        };
 
-		auto updateCbWithoutUndo = [](void *obj, obs_data_t *settings) {
-			OBSSource source = static_cast<obs_source_t *>(obj);
-			obs_source_update(source, settings);
-		};
+        auto updateCbWithoutUndo = [](void *obj, obs_data_t *settings) {
+            OBSSource source = static_cast<obs_source_t *>(obj);
+            obs_source_update(source, settings);
+        };
 
-		OBSDataAutoRelease settings = obs_source_get_settings(source);
-		OBSPropertiesView *propertiesView = new OBSPropertiesView(
-			settings.Get(), source,
-			(PropertiesReloadCallback)obs_source_properties,
-			(PropertiesUpdateCallback)updateCb,
-			(PropertiesVisualUpdateCb)updateCbWithoutUndo);
+        OBSDataAutoRelease settings = obs_source_get_settings(source);
+        OBSPropertiesView *propertiesView = new OBSPropertiesView(settings.Get(), source,
+                                                                  (PropertiesReloadCallback)obs_source_properties,
+                                                                  (PropertiesUpdateCallback)updateCb,
+                                                                  (PropertiesVisualUpdateCb)updateCbWithoutUndo);
 
-		QVBoxLayout *layout = new QVBoxLayout();
-		layout->setContentsMargins(0, 0, 0, 0);
-		layout->addWidget(propertiesView, 1);
+        QVBoxLayout *subLayout = new QVBoxLayout();
+        subLayout->setContentsMargins(0, 0, 0, 0);
+        subLayout->addWidget(propertiesView, 1);
 
-		obs_properties_t *props = obs_source_properties(source);
-		if (obs_properties_get_flags(props) &
-		    OBS_PROPERTIES_DEFER_UPDATE) {
-			QPushButton *button = new QPushButton(QTStr("Apply"));
-			connect(button, &QPushButton::clicked, [this]() {
-				mainWidget->findChild<OBSPropertiesView *>()
-					->UpdateSettings();
-			});
-			button->setSizePolicy(QSizePolicy::Fixed,
-					      QSizePolicy::Fixed);
-			layout->addWidget(button, 0, Qt::AlignRight);
-		}
-		obs_properties_destroy(props);
+        obs_properties_t *props = obs_source_properties(source);
+        if (obs_properties_get_flags(props) & OBS_PROPERTIES_DEFER_UPDATE) {
+            QPushButton *button = new QPushButton(tr("Apply"));
+            connect(button, &QPushButton::clicked,
+                    [this]() { mainWidget->findChild<OBSPropertiesView *>()->UpdateSettings(); });
+            button->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+            subLayout->addWidget(button, 0, Qt::AlignRight);
+        }
+        obs_properties_destroy(props);
 
-		mainWidget = new QWidget();
-		mainWidget->setLayout(layout);
-		setWidget(mainWidget);
-	} else {
-		if (mainWidget) {
-			delete mainWidget;
-			mainWidget = nullptr;
-		}
+        if (nothingSelectedLabelSet) {
+            layout->removeWidget(nothingSelectedLabel);
+            nothingSelectedLabelSet = false;
+        }
+        if (mainWidget) {
+            layout->removeWidget(mainWidget);
+            mainWidget->deleteLater();
+        }
+        mainWidget = new QWidget();
+        mainWidget->setLayout(subLayout);
 
-		if (!nothingSelectedLabel)
-			nothingSelectedLabel = new QLabel(QTStr(
-				"Basic.TransformWindow.NoSelectedSource"));
-		setWidget(nothingSelectedLabel);
-	}
-}
+        layout->addWidget(mainWidget);
+    } else {
+        if (mainWidget) {
+            layout->removeWidget(mainWidget);
+            mainWidget->deleteLater();
+            mainWidget = nullptr;
+        }
 
-PropertiesDock::PropertiesDock(QWidget *parent) : QDockWidget(parent)
-{
-	setFeatures(DockWidgetMovable | DockWidgetFloatable |
-		    DockWidgetClosable);
-	setWindowTitle(obs_module_text("PropertiesDock.Title"));
-	setObjectName("PropertiesDock");
-	setFloating(true);
+        if (!nothingSelectedLabel)
+            nothingSelectedLabel = new QLabel(tr("Basic.TransformWindow.NoSelectedSource"));
+
+        if (!nothingSelectedLabelSet) {
+            layout->addWidget(nothingSelectedLabel);
+            nothingSelectedLabelSet = true;
+        }
+    }
 }

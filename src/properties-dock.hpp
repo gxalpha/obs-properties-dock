@@ -18,25 +18,29 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 
 #pragma once
 
-#include "obs-classes/properties-view.hpp"
-#include "obs-classes-helper-functions.hpp"
+#include <properties-view.hpp>
 
 #include <obs.hpp>
 #include <obs-module.h>
 
-#include <QDockWidget>
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QPushButton>
 
-class PropertiesDock : public QDockWidget {
-	Q_OBJECT
+class PropertiesDock : public QWidget {
+    Q_OBJECT
 
 public:
-	PropertiesDock(QWidget *parent = nullptr);
-	void SetSource(OBSSource source);
+    PropertiesDock(QWidget *parent = nullptr) : QWidget(parent)
+    {
+        layout = new QVBoxLayout();
+        setLayout(layout);
+    };
+    void SetSource(OBSSource source);
 
 private:
-	QWidget *mainWidget = nullptr;
-	QLabel *nothingSelectedLabel = nullptr;
+    QVBoxLayout *layout = nullptr;
+    QWidget *mainWidget = nullptr;
+    QLabel *nothingSelectedLabel = nullptr;
+    bool nothingSelectedLabelSet = false;
 };

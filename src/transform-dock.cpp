@@ -20,32 +20,30 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 
 void TransformDock::SetSceneItem(OBSSceneItem item)
 {
-	if (item) {
-		if (transformView) {
-			transformView->SetNewItem(item);
-		} else {
-			delete transformView;
-			transformView = new OBSBasicTransform(item);
-			setWidget(transformView);
-		}
-	} else {
-		if (transformView) {
-			delete transformView;
-			transformView = nullptr;
-		}
+    if (item) {
+        if (transformView) {
+            transformView->SetNewItem(item);
+        } else {
+            transformView = new OBSBasicTransform(item);
+            layout->removeWidget(nothingSelectedLabel);
+            nothingSelectedLabelSet = false;
+            layout->addWidget(transformView);
+        }
+    } else {
+        if (transformView) {
+            // TODO: There's no need to delete the transform view really.
+            layout->removeWidget(transformView);
+            transformView->deleteLater();
+            transformView = nullptr;
+        }
 
-		if (!nothingSelectedLabel)
-			nothingSelectedLabel = new QLabel(QTStr(
-				"Basic.TransformWindow.NoSelectedSource"));
-		setWidget(nothingSelectedLabel);
-	}
-}
+        if (!nothingSelectedLabel) {
+            nothingSelectedLabel = new QLabel(tr("Basic.TransformWindow.NoSelectedSource"));
+        }
 
-TransformDock::TransformDock(QWidget *parent) : QDockWidget(parent)
-{
-	setFeatures(DockWidgetMovable | DockWidgetFloatable |
-		    DockWidgetClosable);
-	setWindowTitle(obs_module_text("TransformDock.Title"));
-	setObjectName("TransformDock");
-	setFloating(true);
+        if (!nothingSelectedLabelSet) {
+            layout->addWidget(nothingSelectedLabel);
+            nothingSelectedLabelSet = true;
+        }
+    }
 }

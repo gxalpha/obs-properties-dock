@@ -19,23 +19,27 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 #pragma once
 
 #include "transform-view.hpp"
-#include "obs-classes-helper-functions.hpp"
 
 #include <obs.hpp>
 #include <obs-module.h>
 
-#include <QDockWidget>
 #include <QVBoxLayout>
 #include <QLabel>
 
-class TransformDock : public QDockWidget {
-	Q_OBJECT
+class TransformDock : public QWidget {
+    Q_OBJECT
 
 public:
-	TransformDock(QWidget *parent = nullptr);
-	void SetSceneItem(OBSSceneItem item);
+    TransformDock(QWidget *parent = nullptr) : QWidget(parent)
+    {
+        layout = new QVBoxLayout();
+        setLayout(layout);
+    };
+    void SetSceneItem(OBSSceneItem item);
 
 private:
-	OBSBasicTransform *transformView = nullptr;
-	QLabel *nothingSelectedLabel = nullptr;
+    QVBoxLayout *layout = nullptr;
+    OBSBasicTransform *transformView = nullptr;
+    QLabel *nothingSelectedLabel = nullptr;
+    bool nothingSelectedLabelSet = false;
 };

@@ -27,27 +27,27 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 #include <memory>
 
 class OBSBasicTransform : public QDialog {
-	Q_OBJECT
+    Q_OBJECT
 
 public:
-	std::unique_ptr<Ui::OBSBasicTransform> ui;
-	OBSBasicTransform(OBSSceneItem item);
-	void SetNewItem(OBSSceneItem item);
+    std::unique_ptr<Ui::OBSBasicTransform> ui;
+    OBSBasicTransform(OBSSceneItem item);
+    void SetNewItem(OBSSceneItem item);
 
 private:
-	OBSSceneItem item;
-	OBSSignal transformSignal;
-	void HookWidgets();
-	void HookWidget(QWidget *widget, const char *signal, const char *slot);
+    OBSSceneItem item;
+    OBSSignal transformSignal;
+    void HookWidgets();
+    void HookWidget(QWidget *widget, const char *signal, const char *slot);
 
-	int ignoreTransformSignal = 0;
-	int ignoreItemChange = 0;
+    int ignoreTransformSignal = 0;
+    int ignoreItemChange = 0;
 
-	static void SceneItemTransformSignal(void *param, calldata_t *data);
+    static void SceneItemTransformSignal(void *param, calldata_t *data);
 
 private slots:
-	void OnControlChanged();
-	void OnCropChanged();
-	void OnBoundsType(int index);
-	void LoadValues();
+    void OnControlChanged();
+    void OnCropChanged();
+    void OnBoundsType(int index);
+    void LoadValues();
 };
