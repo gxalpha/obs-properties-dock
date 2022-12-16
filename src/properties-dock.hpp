@@ -27,6 +27,7 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 #include <QDockWidget>
 #include <QVBoxLayout>
 #include <QLabel>
+#include <QPushButton>
 
 class PropertiesDock : public QDockWidget {
 	Q_OBJECT
@@ -36,6 +37,6 @@ public:
 	void SetSource(OBSSource source);
 
 private:
-	OBSPropertiesView *propertiesView = nullptr;
+	QWidget *mainWidget = nullptr;
 	QLabel *nothingSelectedLabel = nullptr;
 };

@@ -22,7 +22,9 @@ void PropertiesDock::SetSource(OBSSource source)
 {
 	if (source) {
 		/* Check if the properties changed, otherwise return early */
-		if (propertiesView && propertiesView->IsObject(source))
+		if (mainWidget &&
+		    mainWidget->findChild<OBSPropertiesView *>()->IsObject(
+			    source))
 			return;
 
 		auto updateCb = [](void *obj, obs_data_t *old_settings,
@@ -37,21 +39,38 @@ void PropertiesDock::SetSource(OBSSource source)
 			obs_source_update(source, settings);
 		};
 
-		if (propertiesView)
-			delete propertiesView;
-
 		OBSDataAutoRelease settings = obs_source_get_settings(source);
-		propertiesView = new OBSPropertiesView(
+		OBSPropertiesView *propertiesView = new OBSPropertiesView(
 			settings.Get(), source,
 			(PropertiesReloadCallback)obs_source_properties,
 			(PropertiesUpdateCallback)updateCb,
 			(PropertiesVisualUpdateCb)updateCbWithoutUndo);
 
-		setWidget(propertiesView);
+		QVBoxLayout *layout = new QVBoxLayout();
+		layout->setContentsMargins(0, 0, 0, 0);
+		layout->addWidget(propertiesView, 1);
+
+		obs_properties_t *props = obs_source_properties(source);
+		if (obs_properties_get_flags(props) &
+		    OBS_PROPERTIES_DEFER_UPDATE) {
+			QPushButton *button = new QPushButton(QTStr("Apply"));
+			connect(button, &QPushButton::clicked, [this]() {
+				mainWidget->findChild<OBSPropertiesView *>()
+					->UpdateSettings();
+			});
+			button->setSizePolicy(QSizePolicy::Fixed,
+					      QSizePolicy::Fixed);
+			layout->addWidget(button, 0, Qt::AlignRight);
+		}
+		obs_properties_destroy(props);
+
+		mainWidget = new QWidget();
+		mainWidget->setLayout(layout);
+		setWidget(mainWidget);
 	} else {
-		if (propertiesView) {
-			delete propertiesView;
-			propertiesView = nullptr;
+		if (mainWidget) {
+			delete mainWidget;
+			mainWidget = nullptr;
 		}
 
 		if (!nothingSelectedLabel)
