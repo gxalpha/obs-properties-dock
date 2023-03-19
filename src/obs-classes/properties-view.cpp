@@ -14,7 +14,6 @@
 #include <QStandardItem>
 #include <QFileDialog>
 #include <QColorDialog>
-#include <QPlainTextEdit>
 #include <QDialogButtonBox>
 #include <QMenu>
 #include <QMessageBox>
@@ -29,6 +28,7 @@
 #include "qt-wrappers.hpp"
 #include "properties-view.hpp"
 #include "properties-view.moc.hpp"
+#include "plain-text-edit.hpp"
 #include "obs-app.hpp"
 
 #include <cstdlib>
@@ -116,6 +116,7 @@ void OBSPropertiesView::RefreshProperties()
 		widget->deleteLater();
 
 	widget = new QWidget();
+	widget->setObjectName("PropertiesContainer");
 
 	QFormLayout *layout = new QFormLayout;
 	layout->setFieldGrowthPolicy(QFormLayout::AllNonFixedFieldsGrow);
@@ -137,6 +138,7 @@ void OBSPropertiesView::RefreshProperties()
 	setWidget(widget);
 	SetScrollPos(h, v);
 	setSizePolicy(mainPolicy);
+	adjustSize();
 
 	lastFocused.clear();
 	if (lastWidget) {
@@ -264,17 +266,13 @@ QWidget *OBSPropertiesView::AddText(obs_property_t *prop, QFormLayout *layout,
 {
 	const char *name = obs_property_name(prop);
 	const char *val = obs_data_get_string(settings, name);
-	const bool monospace = obs_property_text_monospace(prop);
+	bool monospace = obs_property_text_monospace(prop);
 	obs_text_type type = obs_property_text_type(prop);
 
 	if (type == OBS_TEXT_MULTILINE) {
-		QPlainTextEdit *edit = new QPlainTextEdit(QT_UTF8(val));
+		OBSPlainTextEdit *edit = new OBSPlainTextEdit(this, monospace);
+		edit->setPlainText(QT_UTF8(val));
 		edit->setTabStopDistance(40);
-		if (monospace) {
-			QFont f("Courier");
-			f.setStyleHint(QFont::Monospace);
-			edit->setFont(f);
-		}
 		return NewWidget(prop, edit, SIGNAL(textChanged()));
 
 	} else if (type == OBS_TEXT_PASSWORD) {
@@ -639,8 +637,7 @@ static void NewButton(QLayout *layout, WidgetInfo *info, const char *themeIcon,
 	QPushButton *button = new QPushButton();
 	button->setProperty("themeID", themeIcon);
 	button->setFlat(true);
-	button->setMaximumSize(22, 22);
-	button->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum);
+	button->setProperty("toolButton", true);
 
 	QObject::connect(button, &QPushButton::clicked, info, method);
 
@@ -661,6 +658,7 @@ void OBSPropertiesView::AddEditableList(obs_property_t *prop,
 	list->setSortingEnabled(false);
 	list->setSelectionMode(QAbstractItemView::ExtendedSelection);
 	list->setToolTip(QT_UTF8(obs_property_long_description(prop)));
+	list->setSpacing(1);
 
 	for (size_t i = 0; i < count; i++) {
 		OBSDataAutoRelease item = obs_data_array_item(array, i);
@@ -899,7 +897,7 @@ static bool matches_ranges(media_frames_per_second &best_match,
 	for (auto &pair : fps_ranges) {
 		auto max_ = convert_fn(pair.first);
 		auto min_ = convert_fn(pair.second);
-		/*blog(LOG_INFO, "%lg ≤ %lg ≤ %lg? %s %s %s",
+		/*blog(LOG_INFO, "%lg <= %lg <= %lg? %s %s %s",
 				min_, val, max_,
 				fabsl(min_ - val) < epsilon ? "true" : "false",
 				min_ <= val && val <= max_  ? "true" : "false",
@@ -1296,8 +1294,7 @@ static void UpdateFPSLabels(OBSFrameRatePropertyWidget *w)
 		w->currentFPS->setHidden(true);
 		w->timePerFrame->setHidden(true);
 		if (!option)
-			w->warningLabel->setStyleSheet(
-				"QLabel { color: red; }");
+			w->warningLabel->setObjectName("errorLabel");
 
 		return;
 	}
@@ -1307,9 +1304,9 @@ static void UpdateFPSLabels(OBSFrameRatePropertyWidget *w)
 
 	media_frames_per_second match{};
 	if (!option && !matches_ranges(match, *valid_fps, w->fps_ranges, true))
-		w->warningLabel->setStyleSheet("QLabel { color: red; }");
+		w->warningLabel->setObjectName("errorLabel");
 	else
-		w->warningLabel->setStyleSheet("");
+		w->warningLabel->setObjectName("");
 
 	auto convert_to_fps = media_frames_per_second_to_fps;
 	auto convert_to_frame_interval =
@@ -1522,8 +1519,8 @@ void OBSPropertiesView::AddProperty(obs_property_t *property,
 		label = new QLabel(QT_UTF8(obs_property_description(property)));
 
 	if (label) {
-		if (warning) //TODO: select color based on background color
-			label->setStyleSheet("QLabel { color: red; }");
+		if (warning)
+			label->setObjectName("errorLabel");
 
 		if (minSize) {
 			label->setMinimumWidth(minSize);
@@ -1724,7 +1721,8 @@ void WidgetInfo::TextChanged(const char *setting)
 	obs_text_type type = obs_property_text_type(property);
 
 	if (type == OBS_TEXT_MULTILINE) {
-		QPlainTextEdit *edit = static_cast<QPlainTextEdit *>(widget);
+		OBSPlainTextEdit *edit =
+			static_cast<OBSPlainTextEdit *>(widget);
 		obs_data_set_string(view->settings, setting,
 				    QT_TO_UTF8(edit->toPlainText()));
 		return;
@@ -1751,6 +1749,11 @@ bool WidgetInfo::PathChanged(const char *setting)
 	else if (type == OBS_PATH_FILE_SAVE)
 		path = SaveFile(view, QT_UTF8(desc), QT_UTF8(default_path),
 				QT_UTF8(filter));
+
+#ifdef __APPLE__
+	// TODO: Revisit when QTBUG-42661 is fixed
+	widget->window()->raise();
+#endif
 
 	if (path.isEmpty())
 		return false;
@@ -1809,15 +1812,18 @@ bool WidgetInfo::ColorChangedInternal(const char *setting, bool supportAlpha)
 		options |= QColorDialog::ShowAlphaChannel;
 	}
 
-	/* The native dialog on OSX has all kinds of problems, like closing
-	 * other open QDialogs on exit, and
-	 * https://bugreports.qt-project.org/browse/QTBUG-34532
-	 */
-#ifndef _WIN32
+#ifdef __linux__
+	// TODO: Revisit hang on Ubuntu with native dialog
 	options |= QColorDialog::DontUseNativeDialog;
 #endif
 
 	color = QColorDialog::getColor(color, view, QT_UTF8(desc), options);
+
+#ifdef __APPLE__
+	// TODO: Revisit when QTBUG-42661 is fixed
+	widget->window()->raise();
+#endif
+
 	if (!color.isValid())
 		return false;
 
@@ -1967,13 +1973,12 @@ void WidgetInfo::ButtonClicked()
 		}
 		return;
 	}
-	if (view->rawObj || view->weakObj) {
-		OBSObject strongObj = view->GetObject();
-		void *obj = strongObj ? strongObj.Get() : view->rawObj;
-		if (obs_property_button_clicked(property, obj)) {
-			QMetaObject::invokeMethod(view, "RefreshProperties",
-						  Qt::QueuedConnection);
-		}
+
+	OBSObject strongObj = view->GetObject();
+	void *obj = strongObj ? strongObj.Get() : view->rawObj;
+	if (obs_property_button_clicked(property, obj)) {
+		QMetaObject::invokeMethod(view, "RefreshProperties",
+					  Qt::QueuedConnection);
 	}
 }
 
@@ -2219,6 +2224,10 @@ void WidgetInfo::EditListAddFiles()
 
 	QStringList files = OpenFiles(App()->GetMainWindow(), title,
 				      QT_UTF8(default_path), QT_UTF8(filter));
+#ifdef __APPLE__
+	// TODO: Revisit when QTBUG-42661 is fixed
+	widget->window()->raise();
+#endif
 
 	if (files.count() == 0)
 		return;
@@ -2239,6 +2248,10 @@ void WidgetInfo::EditListAddDir()
 
 	QString dir = SelectDirectory(App()->GetMainWindow(), title,
 				      QT_UTF8(default_path));
+#ifdef __APPLE__
+	// TODO: Revisit when QTBUG-42661 is fixed
+	widget->window()->raise();
+#endif
 
 	if (dir.isEmpty())
 		return;

@@ -19,6 +19,8 @@ target_sources(
           src/obs-classes/double-slider.cpp
           src/obs-classes/double-slider.hpp
           src/obs-classes/mute-checkbox.hpp
+          src/obs-classes/plain-text-edit.cpp
+          src/obs-classes/plain-text-edit.hpp
           src/obs-classes/properties-view.cpp
           src/obs-classes/properties-view.hpp
           src/obs-classes/properties-view.moc.hpp
