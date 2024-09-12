@@ -16,8 +16,10 @@ You should have received a copy of the GNU General Public License along
 with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
-#include "properties-dock.hpp"
-#include <obs-frontend-api.h>
+#include "moc_properties-dock.cpp"
+
+#include <properties-view.hpp>
+#include <QPushButton>
 
 void PropertiesDock::SetSource(OBSSource source)
 {

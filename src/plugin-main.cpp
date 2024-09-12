@@ -96,10 +96,10 @@ void SceneChangeEvenet(enum obs_frontend_event event, void *)
 
 bool obs_module_load(void)
 {
-    obs_log(LOG_INFO, "Version %s", PLUGIN_VERSION);
-    obs_log(LOG_INFO, "OBS: %d.%d.%d (compiled), %s (runtime)", LIBOBS_API_MAJOR_VER, LIBOBS_API_MINOR_VER,
+    obs_log(LOG_INFO, "Plguin version %s", PLUGIN_VERSION);
+    obs_log(LOG_INFO, "OBS version: %d.%d.%d (compiled), %s (runtime)", LIBOBS_API_MAJOR_VER, LIBOBS_API_MINOR_VER,
             LIBOBS_API_PATCH_VER, obs_get_version_string());
-    obs_log(LOG_INFO, "QT: %s (compiled), %s (runtime)", QT_VERSION_STR, qVersion());
+    obs_log(LOG_INFO, "Qt version: %s (compiled), %s (runtime)", QT_VERSION_STR, qVersion());
 
     QMainWindow *main = static_cast<QMainWindow *>(obs_frontend_get_main_window());
     properties = new PropertiesDock(main);

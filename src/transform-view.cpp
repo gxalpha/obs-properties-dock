@@ -16,9 +16,9 @@ You should have received a copy of the GNU General Public License along
 with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
-#include "transform-view.hpp"
+#include "moc_transform-view.cpp"
 
-OBSBasicTransform::OBSBasicTransform(OBSSceneItem item_) : ui(new Ui::OBSBasicTransform), item(item_)
+OBSBasicTransform::OBSBasicTransform(OBSSceneItem item) : ui(new Ui::OBSBasicTransform), item(item)
 {
     ui->setupUi(this);
 
@@ -33,9 +33,9 @@ OBSBasicTransform::OBSBasicTransform(OBSSceneItem item_) : ui(new Ui::OBSBasicTr
     transformSignal.Connect(sh, "item_transform", SceneItemTransformSignal, this);
 }
 
-void OBSBasicTransform::SetNewItem(OBSSceneItem item_)
+void OBSBasicTransform::SetNewItem(OBSSceneItem item)
 {
-    item = item_;
+    this->item = item;
     LoadValues();
 }
 

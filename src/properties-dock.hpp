@@ -18,14 +18,10 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 
 #pragma once
 
-#include <properties-view.hpp>
-
 #include <obs.hpp>
-#include <obs-module.h>
 
 #include <QVBoxLayout>
 #include <QLabel>
-#include <QPushButton>
 
 class PropertiesDock : public QWidget {
     Q_OBJECT
