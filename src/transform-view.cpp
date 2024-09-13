@@ -43,31 +43,26 @@ void OBSBasicTransform::SetNewItem(OBSSceneItem item)
 /* From here on mostly copied from window-basic-transform.cpp */
 /*------------------------------------------------------------*/
 
-void OBSBasicTransform::HookWidget(QWidget *widget, const char *signal, const char *slot)
-{
-    QObject::connect(widget, signal, this, slot);
-}
-
-#define COMBO_CHANGED SIGNAL(currentIndexChanged(int))
-#define ISCROLL_CHANGED SIGNAL(valueChanged(int))
-#define DSCROLL_CHANGED SIGNAL(valueChanged(double))
+#define COMBO_CHANGED &QComboBox::currentIndexChanged
+#define ISCROLL_CHANGED &QSpinBox::valueChanged
+#define DSCROLL_CHANGED &QDoubleSpinBox::valueChanged
 
 void OBSBasicTransform::HookWidgets()
 {
-    HookWidget(ui->positionX, DSCROLL_CHANGED, SLOT(OnControlChanged()));
-    HookWidget(ui->positionY, DSCROLL_CHANGED, SLOT(OnControlChanged()));
-    HookWidget(ui->rotation, DSCROLL_CHANGED, SLOT(OnControlChanged()));
-    HookWidget(ui->sizeX, DSCROLL_CHANGED, SLOT(OnControlChanged()));
-    HookWidget(ui->sizeY, DSCROLL_CHANGED, SLOT(OnControlChanged()));
-    HookWidget(ui->align, COMBO_CHANGED, SLOT(OnControlChanged()));
-    HookWidget(ui->boundsType, COMBO_CHANGED, SLOT(OnBoundsType(int)));
-    HookWidget(ui->boundsAlign, COMBO_CHANGED, SLOT(OnControlChanged()));
-    HookWidget(ui->boundsWidth, DSCROLL_CHANGED, SLOT(OnControlChanged()));
-    HookWidget(ui->boundsHeight, DSCROLL_CHANGED, SLOT(OnControlChanged()));
-    HookWidget(ui->cropLeft, ISCROLL_CHANGED, SLOT(OnCropChanged()));
-    HookWidget(ui->cropRight, ISCROLL_CHANGED, SLOT(OnCropChanged()));
-    HookWidget(ui->cropTop, ISCROLL_CHANGED, SLOT(OnCropChanged()));
-    HookWidget(ui->cropBottom, ISCROLL_CHANGED, SLOT(OnCropChanged()));
+    HookWidget(ui->positionX, DSCROLL_CHANGED, &OBSBasicTransform::OnControlChanged);
+    HookWidget(ui->positionY, DSCROLL_CHANGED, &OBSBasicTransform::OnControlChanged);
+    HookWidget(ui->rotation, DSCROLL_CHANGED, &OBSBasicTransform::OnControlChanged);
+    HookWidget(ui->sizeX, DSCROLL_CHANGED, &OBSBasicTransform::OnControlChanged);
+    HookWidget(ui->sizeY, DSCROLL_CHANGED, &OBSBasicTransform::OnControlChanged);
+    HookWidget(ui->align, COMBO_CHANGED, &OBSBasicTransform::OnControlChanged);
+    HookWidget(ui->boundsType, COMBO_CHANGED, &OBSBasicTransform::OnBoundsType);
+    HookWidget(ui->boundsAlign, COMBO_CHANGED, &OBSBasicTransform::OnControlChanged);
+    HookWidget(ui->boundsWidth, DSCROLL_CHANGED, &OBSBasicTransform::OnControlChanged);
+    HookWidget(ui->boundsHeight, DSCROLL_CHANGED, &OBSBasicTransform::OnControlChanged);
+    HookWidget(ui->cropLeft, ISCROLL_CHANGED, &OBSBasicTransform::OnCropChanged);
+    HookWidget(ui->cropRight, ISCROLL_CHANGED, &OBSBasicTransform::OnCropChanged);
+    HookWidget(ui->cropTop, ISCROLL_CHANGED, &OBSBasicTransform::OnCropChanged);
+    HookWidget(ui->cropBottom, ISCROLL_CHANGED, &OBSBasicTransform::OnCropChanged);
 }
 
 static const uint32_t listToAlign[] = {OBS_ALIGN_TOP | OBS_ALIGN_LEFT,

@@ -37,7 +37,14 @@ private:
     OBSSceneItem item;
     OBSSignal transformSignal;
     void HookWidgets();
-    void HookWidget(QWidget *widget, const char *signal, const char *slot);
+
+    /* From obs-basic-transform.hpp */
+    template<typename Widget, typename WidgetParent, typename... SignalArgs, typename... SlotArgs>
+    void HookWidget(Widget *widget, void (WidgetParent::*signal)(SignalArgs...),
+                    void (OBSBasicTransform::*slot)(SlotArgs...))
+    {
+        QObject::connect(widget, signal, this, slot);
+    }
 
     int ignoreTransformSignal = 0;
     int ignoreItemChange = 0;
