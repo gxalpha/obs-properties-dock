@@ -63,6 +63,11 @@ void OBSBasicTransform::HookWidgets()
     HookWidget(ui->cropRight, ISCROLL_CHANGED, &OBSBasicTransform::OnCropChanged);
     HookWidget(ui->cropTop, ISCROLL_CHANGED, &OBSBasicTransform::OnCropChanged);
     HookWidget(ui->cropBottom, ISCROLL_CHANGED, &OBSBasicTransform::OnCropChanged);
+#if QT_VERSION >= QT_VERSION_CHECK(6, 7, 0)
+    HookWidget(ui->cropToBounds, &QCheckBox::checkStateChanged, &OBSBasicTransform::OnControlChanged);
+#else
+    HookWidget(ui->cropToBounds, &QCheckBox::stateChanged, &OBSBasicTransform::OnControlChanged);
+#endif
 }
 
 static const uint32_t listToAlign[] = {OBS_ALIGN_TOP | OBS_ALIGN_LEFT,
@@ -94,21 +99,30 @@ void OBSBasicTransform::OnControlChanged()
         return;
 
     obs_source_t *source = obs_sceneitem_get_source(item);
-    double width = double(obs_source_get_width(source));
-    double height = double(obs_source_get_height(source));
+    uint32_t source_cx = obs_source_get_width(source);
+    uint32_t source_cy = obs_source_get_height(source);
+    double width = double(source_cx);
+    double height = double(source_cy);
 
     obs_transform_info oti;
+    obs_sceneitem_get_info2(item, &oti);
+
+    /* do not scale a source if it has 0 width/height */
+    if (source_cx != 0 && source_cy != 0) {
+        oti.scale.x = float(ui->sizeX->value() / width);
+        oti.scale.y = float(ui->sizeY->value() / height);
+    }
+
     oti.pos.x = float(ui->positionX->value());
     oti.pos.y = float(ui->positionY->value());
     oti.rot = float(ui->rotation->value());
-    oti.scale.x = float(ui->sizeX->value() / width);
-    oti.scale.y = float(ui->sizeY->value() / height);
     oti.alignment = listToAlign[ui->align->currentIndex()];
 
     oti.bounds_type = (obs_bounds_type)ui->boundsType->currentIndex();
     oti.bounds_alignment = listToAlign[ui->boundsAlign->currentIndex()];
     oti.bounds.x = float(ui->boundsWidth->value());
     oti.bounds.y = float(ui->boundsHeight->value());
+    oti.crop_to_bounds = ui->cropToBounds->isChecked();
 
     ignoreTransformSignal++;
     obs_sceneitem_set_info2(item, &oti);
@@ -142,6 +156,7 @@ void OBSBasicTransform::OnBoundsType(int index)
     ui->boundsAlign->setEnabled(enable);
     ui->boundsWidth->setEnabled(enable);
     ui->boundsHeight->setEnabled(enable);
+    ui->cropToBounds->setEnabled(enable);
 
     if (ignoreItemChange == 0) {
         obs_bounds_type lastType = obs_sceneitem_get_bounds_type(item);
