@@ -37,6 +37,8 @@ endif()
 target_sources(
   ${CMAKE_PROJECT_NAME}
   PRIVATE
+    src/dock-manager.cpp
+    src/dock-manager.hpp
     src/plugin-main.cpp
     src/properties-dock.cpp
     src/properties-dock.hpp
