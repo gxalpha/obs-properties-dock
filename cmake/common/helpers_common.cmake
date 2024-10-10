@@ -1,22 +1,13 @@
 # CMake common helper functions module
 
-# cmake-format: off
-# cmake-lint: disable=C0103
-# cmake-format: on
-
 include_guard(GLOBAL)
 
 # check_uuid: Helper function to check for valid UUID
 function(check_uuid uuid_string return_value)
   set(valid_uuid TRUE)
-  set(
-    uuid_token_lengths
-    8
-    4
-    4
-    4
-    12
-  )
+  # gersemi: off
+  set(uuid_token_lengths 8 4 4 4 12)
+  # gersemi: on
   set(token_num 0)
 
   string(REPLACE "-" ";" uuid_tokens ${uuid_string})

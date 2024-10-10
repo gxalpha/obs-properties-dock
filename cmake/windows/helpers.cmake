@@ -1,9 +1,5 @@
 # CMake Windows helper functions module
 
-# cmake-format: off
-# cmake-lint: disable=C0103
-# cmake-format: on
-
 include_guard(GLOBAL)
 
 include(helpers_common)

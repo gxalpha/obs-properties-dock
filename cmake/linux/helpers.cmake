@@ -20,7 +20,7 @@ function(set_target_properties_plugin target)
 
   set_target_properties(
     ${target}
-    PROPERTIES VERSION 0 SOVERSION ${PLUGIN_VERSION} PREFIX ""
+    PROPERTIES VERSION ${PLUGIN_VERSION} SOVERSION ${PLUGIN_VERSION_MAJOR} PREFIX ""
   )
 
   install(
