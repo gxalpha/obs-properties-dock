@@ -17,8 +17,10 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 */
 
 #include <memory>
+
 #include <QVersionNumber>
 
+#include <obs-config.h>
 #include <obs-module.h>
 #include <plugin-support.h>
 
@@ -31,7 +33,12 @@ static std::unique_ptr<DockManager> dockManager;
 
 bool obs_module_load(void)
 {
-    obs_log(LOG_INFO, "Plguin version %s", PLUGIN_VERSION);
+    if (obs_get_version() < MAKE_SEMANTIC_VERSION(31, 0, 0)) {
+        obs_log(LOG_WARNING, "This plugin requires OBS Studio 31.0.0 or later.");
+        return false;
+    }
+
+    obs_log(LOG_INFO, "Plugin version: %s", PLUGIN_VERSION);
     obs_log(LOG_INFO, "OBS version: %d.%d.%d (compiled), %s (runtime)", LIBOBS_API_MAJOR_VER, LIBOBS_API_MINOR_VER,
             LIBOBS_API_PATCH_VER, obs_get_version_string());
     obs_log(LOG_INFO, "Qt version: %s (compiled), %s (runtime)", QT_VERSION_STR, qVersion());
@@ -41,7 +48,7 @@ bool obs_module_load(void)
     return true;
 }
 
-void obs_module_unload()
+void obs_module_unload(void)
 {
     dockManager.reset();
 }
