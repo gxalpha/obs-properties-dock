@@ -21,6 +21,7 @@ with this program. If not, see <https://www.gnu.org/licenses/>
 #include <memory>
 #include <QPointer>
 
+#include <obs.hpp>
 #include <obs-frontend-api.h>
 
 class PropertiesDock;
@@ -38,6 +39,7 @@ private:
     std::unique_ptr<OBSSignal> selectSignal;
     std::unique_ptr<OBSSignal> deselectSignal;
     int selectedItemsCount;
+    OBSSceneItem selectedItem;
 
     static void SceneChangeEvent(enum obs_frontend_event event, void *);
     static void SceneItemSelectSignal(void *, calldata_t *data);

@@ -43,6 +43,7 @@ void DockManager::SceneItemDeselectSignal(void *ptr, calldata_t *)
 
     dockManager->selectedItemsCount--;
     if (dockManager->selectedItemsCount == 0) {
+        dockManager->selectedItem = nullptr;
         dockManager->properties->SetSource(nullptr);
         dockManager->transform->SetSceneItem(nullptr);
     }
@@ -66,29 +67,22 @@ void DockManager::SceneChangeEvent(enum obs_frontend_event event, void *ptr)
     dockManager->deselectSignal->Connect(sh, "item_deselect", SceneItemDeselectSignal, dockManager);
 
     /* Get current item and count */
-    // TODO: This code is in need of improvement
     dockManager->selectedItemsCount = 0;
-    struct cb_data {
-        int *selectedItemsCount;
-        OBSSceneItem selectedItem;
-    } data;
-    data.selectedItemsCount = &dockManager->selectedItemsCount;
-    data.selectedItem = nullptr;
     auto cb = [](obs_scene_t *, obs_sceneitem_t *item, void *data) {
-        struct cb_data *cb_data = static_cast<struct cb_data *>(data);
+        auto dockManager = static_cast<DockManager *>(data);
         if (obs_sceneitem_selected(item)) {
-            (*cb_data->selectedItemsCount)++;
+            dockManager->selectedItemsCount++;
             /* Always override to get the top-most item */
-            cb_data->selectedItem = item;
+            dockManager->selectedItem = item;
         }
         return true;
     };
-    obs_scene_enum_items(obs_scene_from_source(currentSceneSource), cb, &data);
+    OBSScene currentScene = obs_scene_from_source(currentSceneSource);
+    obs_scene_enum_items(currentScene, cb, dockManager);
 
-    OBSSceneItem item = data.selectedItem;
-    OBSSource source = obs_sceneitem_get_source(item);
+    OBSSource source = obs_sceneitem_get_source(dockManager->selectedItem);
     dockManager->properties->SetSource(source);
-    dockManager->transform->SetSceneItem(item);
+    dockManager->transform->SetSceneItem(dockManager->selectedItem);
 }
 
 DockManager::DockManager()
