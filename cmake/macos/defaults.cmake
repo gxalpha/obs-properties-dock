@@ -22,7 +22,7 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     CMAKE_INSTALL_PREFIX
     "$ENV{HOME}/Library/Application Support/obs-studio/plugins"
     CACHE STRING
-    "Directory to install OBS after building"
+    "Default plugin installation directory"
     FORCE
   )
 endif()

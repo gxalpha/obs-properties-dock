@@ -31,6 +31,22 @@ function(set_target_properties_plugin target)
     OPTIONAL
   )
 
+  if(TARGET plugin-support)
+    target_link_libraries(${target} PRIVATE plugin-support)
+  endif()
+
+  add_custom_command(
+    TARGET ${target}
+    POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/rundir/$<CONFIG>"
+    COMMAND
+      "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:${target}>"
+      "$<$<CONFIG:Debug,RelWithDebInfo,Release>:$<TARGET_PDB_FILE:${target}>>"
+      "${CMAKE_CURRENT_BINARY_DIR}/rundir/$<CONFIG>"
+    COMMENT "Copy ${target} to rundir"
+    VERBATIM
+  )
+
   if(OBS_BUILD_DIR)
     add_custom_command(
       TARGET ${target}
@@ -42,10 +58,6 @@ function(set_target_properties_plugin target)
       COMMENT "Copy ${target} to obs-studio directory ${OBS_BUILD_DIR}"
       VERBATIM
     )
-  endif()
-
-  if(TARGET plugin-support)
-    target_link_libraries(${target} PRIVATE plugin-support)
   endif()
 
   target_install_resources(${target})
@@ -91,6 +103,17 @@ function(target_install_resources target)
 
     install(DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/data/" DESTINATION data/obs-plugins/${target} USE_SOURCE_PERMISSIONS)
 
+    add_custom_command(
+      TARGET ${target}
+      POST_BUILD
+      COMMAND "${CMAKE_COMMAND}" -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/rundir/$<CONFIG>/${target}"
+      COMMAND
+        "${CMAKE_COMMAND}" -E copy_directory "${CMAKE_CURRENT_SOURCE_DIR}/data"
+        "${CMAKE_CURRENT_BINARY_DIR}/rundir/$<CONFIG>/${target}"
+      COMMENT "Copy ${target} resources to rundir"
+      VERBATIM
+    )
+
     if(OBS_BUILD_DIR)
       add_custom_command(
         TARGET ${target}
@@ -111,6 +134,15 @@ function(target_add_resource target resource)
   message(DEBUG "Add resource '${resource}' to target ${target} at destination '${target_destination}'...")
 
   install(FILES "${resource}" DESTINATION data/obs-plugins/${target} COMPONENT Runtime)
+
+  add_custom_command(
+    TARGET ${target}
+    POST_BUILD
+    COMMAND "${CMAKE_COMMAND}" -E make_directory "${CMAKE_CURRENT_BINARY_DIR}/rundir/$<CONFIG>/${target}"
+    COMMAND "${CMAKE_COMMAND}" -E copy "${resource}" "${CMAKE_CURRENT_BINARY_DIR}/rundir/$<CONFIG>/${target}"
+    COMMENT "Copy ${target} resource ${resource} to rundir"
+    VERBATIM
+  )
 
   if(OBS_BUILD_DIR)
     add_custom_command(
